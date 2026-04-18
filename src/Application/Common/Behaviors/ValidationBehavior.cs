@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using SocialLogin.Domain.Common;
+using SocialLogin.Domain.Common.Errors;
 
 namespace SocialLogin.Application.Common.Behaviors;
 
@@ -32,25 +33,22 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         if (failures.Count == 0)
             return await next();
 
-        var errors = failures
-            .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage))
-            .ToArray();
+        var messages = failures
+            .Select(f => f.ErrorMessage)
+            .ToList();
 
+        var validationError = new ValidationError(messages, new NoException());
         var responseType = typeof(TResponse);
 
         if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>))
         {
             var valueType = responseType.GetGenericArguments()[0];
-            var failureMethod = typeof(Result)
-                .GetMethods()
-                .First(m => m.Name == "Failure" && m.IsGenericMethod)
-                .MakeGenericMethod(valueType);
-
-            return (TResponse)failureMethod.Invoke(null, [errors[0]])!;
+            var resultType = typeof(Result<>).MakeGenericType(valueType);
+            return (TResponse)Activator.CreateInstance(resultType, validationError)!;
         }
 
         if (responseType == typeof(Result))
-            return (TResponse)(object)Result.Failure(errors[0]);
+            return (TResponse)(object)Result.Failure(validationError);
 
         throw new ValidationException(failures);
     }

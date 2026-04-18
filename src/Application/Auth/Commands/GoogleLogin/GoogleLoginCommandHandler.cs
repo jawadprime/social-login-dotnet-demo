@@ -28,7 +28,7 @@ public sealed class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginComma
     {
         var googleUser = await _googleAuthService.VerifyGoogleTokenAsync(request.IdToken);
         if (googleUser is null)
-            return Result.Failure<AuthResponse>(DomainErrors.Auth.InvalidGoogleToken);
+            return new Result<AuthResponse>(DomainErrors.Auth.InvalidGoogleToken);
 
         var user = await _userManager.FindByEmailAsync(googleUser.Email);
 
@@ -47,7 +47,7 @@ public sealed class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginComma
 
             var createResult = await _userManager.CreateAsync(user);
             if (!createResult.Succeeded)
-                return Result.Failure<AuthResponse>(DomainErrors.Auth.UserCreationFailed);
+                return new Result<AuthResponse>(DomainErrors.Auth.UserCreationFailed);
 
             await _userManager.AddToRoleAsync(user, "User");
         }
@@ -56,13 +56,13 @@ public sealed class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginComma
         var accessToken = _tokenService.GenerateAccessToken(user, roles);
         var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id, request.IpAddress);
 
-        return new AuthResponse(
+        return new Result<AuthResponse>(new AuthResponse(
             accessToken,
             refreshToken.Token,
-            DateTime.UtcNow.AddMinutes(15),
+            _tokenService.GetAccessTokenExpiry(),
             user.Id,
             user.Email!,
             user.FirstName,
-            user.LastName);
+            user.LastName));
     }
 }

@@ -5,5 +5,6 @@ namespace SocialLogin.Application.Common.Interfaces;
 public interface ITokenService
 {
     string GenerateAccessToken(ApplicationUser user, IList<string> roles);
+    DateTime GetAccessTokenExpiry();
     Task<RefreshToken> GenerateRefreshTokenAsync(string userId, string? ipAddress);
 }
