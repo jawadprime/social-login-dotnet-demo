@@ -1,6 +1,6 @@
 # Social Login .NET Demo
 
-A production-ready ASP.NET Core Web API demonstrating Google OAuth2 social login with JWT authentication, built following Clean Architecture and SOLID principles.
+A production-ready ASP.NET Core Web API demonstrating Google OAuth2 social login with JWT authentication. The solution follows Clean Architecture principles where practical and separates concerns across Domain, Infrastructure, Common and Presentation layers.
 
 ---
 
@@ -29,40 +29,28 @@ A production-ready ASP.NET Core Web API demonstrating Google OAuth2 social login
 
 ```
 src/
-├── SocialLogin.Domain/            # Enterprise business rules
-│   ├── Common/                    # Result<T>, Error, ErrorType
+├── Domain/                        # Enterprise business rules (Entities, Errors, Common types)
+│   ├── Common/                    # Result, Error, MaybeException
 │   ├── Entities/                  # ApplicationUser, RefreshToken
-│   └── Errors/                    # DomainErrors static class
+│   └── Errors/                    # Domain-specific error types
 │
-├── SocialLogin.Application/       # Application business rules (use cases)
-│   ├── Auth/
-│   │   ├── Commands/
-│   │   │   ├── GoogleLogin/       # Command, Handler, Validator
-│   │   │   ├── RefreshToken/      # Command, Handler, Validator
-│   │   │   └── RevokeToken/       # Command, Handler, Validator
-│   │   └── DTOs/                  # AuthResponse
-│   ├── Common/
-│   │   ├── Behaviors/             # ValidationBehavior (MediatR pipeline)
-│   │   └── Interfaces/            # IApplicationDbContext, ITokenService, IGoogleAuthService
-│   └── DependencyInjection.cs
-│
-├── SocialLogin.Infrastructure/    # Frameworks, drivers, adapters
+├── Infrastructure/                # Frameworks, drivers, adapters
 │   ├── Options/                   # JwtOptions, GoogleAuthOptions
 │   ├── Persistence/               # ApplicationDbContext, EF Migrations
 │   ├── Services/                  # TokenService, GoogleAuthService
-│   └── DependencyInjection.cs
+│   └── DependencyInjection.cs     # Service registrations + Seed helpers
 │
-└── SocialLogin.Api/               # Presentation layer
-    ├── Common/                    # ApiResponse<T>, ApiError
-    ├── Controllers/V1/            # AuthController
-    ├── Extensions/                # ResultExtensions (Result → IActionResult)
-    ├── Middleware/                # ExceptionHandlingMiddleware
-    └── Program.cs
+├── Common/                        # Cross-cutting primitives (Result<T>, Error)
+│
+└── Presentation/                  # API (controllers, middleware, program)
+    ├── Controllers/               # AuthController (v1)
+    ├── Extensions/                # Result → IActionResult conversions
+    ├── Middleware/                # Global exception handling
+    └── Program.cs                 # Web host & DI composition
 ```
 
-**Dependency flow:**  
-`Api` → `Application` → `Domain`  
-`Infrastructure` → `Application` → `Domain`
+**Dependency flow:**
+Presentation -> Infrastructure -> Domain
 
 ---
 
@@ -85,7 +73,7 @@ cd social-login-dotnet-demo
 
 ### 2. Configure application settings
 
-Edit `src/SocialLogin.Api/appsettings.json` or use **User Secrets**:
+Edit `src/Presentation/appsettings.json` (or create one there) or use **User Secrets**:
 
 ```json
 {
@@ -114,18 +102,18 @@ Edit `src/SocialLogin.Api/appsettings.json` or use **User Secrets**:
 
 ### 3. Apply database migrations
 
-The API automatically runs migrations on startup in Development mode. To apply manually:
+The API automatically runs migrations on startup in Development mode. To apply migrations manually:
 
 ```bash
 dotnet ef database update \
-  --project src/SocialLogin.Infrastructure \
-  --startup-project src/SocialLogin.Api
+  --project src/Infrastructure \
+  --startup-project src/Presentation
 ```
 
 ### 4. Run the API
 
 ```bash
-dotnet run --project src/SocialLogin.Api
+dotnet run --project src/Presentation
 ```
 
 Swagger UI: **https://localhost:{port}/swagger**
@@ -271,7 +259,7 @@ Authorization: Bearer <accessToken>
 
 | Package | Purpose |
 |---------|---------|
-| `MediatR` | CQRS command/query dispatcher |
+| `MediatR` | (optional) CQRS command/query dispatcher |
 | `FluentValidation` | Request validation |
 | `Google.Apis.Auth` | Google ID token verification |
 | `Microsoft.AspNetCore.Identity` | User management & password hashing |
@@ -292,6 +280,11 @@ Authorization: Bearer <accessToken>
 - **Role Seeding** — `User` and `Admin` roles are seeded automatically on startup
 
 ---
+
+## Notes
+
+- The solution in this repository separates Domain, Infrastructure, Presentation and Common layers. There is no dedicated "Application" project in the current workspace — application/service-level logic is implemented across the Infrastructure and Presentation layers.
+- If you plan to evolve this into a full Clean Architecture scaffold, consider extracting use-cases, DTOs and MediatR handlers into a dedicated Application project.
 
 ## License
 
