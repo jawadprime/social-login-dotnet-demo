@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SocialLogin.Application/SocialLogin.Application.csproj" />
+    <Project Path="src/SocialLogin.Domain/SocialLogin.Domain.csproj" />
+    <Project Path="src/SocialLogin.Infrastructure/SocialLogin.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/SocialLogin.Api/">
+    <Project Path="src/SocialLogin.Api/ApiPresentation.csproj" />
+  </Folder>
+</Solution>
