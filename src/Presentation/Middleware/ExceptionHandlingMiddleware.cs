@@ -33,14 +33,11 @@ public sealed class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-        var response = ApiResponse.Fail(new ApiError
-        {
-            Code = "Server.UnhandledException",
-            Message = "An unexpected error occurred. Please try again later.",
-            StatusCode = 500
-        });
+        var problem = new ProblemInfo(
+            "Unexpected Error",
+            "An unexpected error occurred. Please try again later.");
 
-        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
+        var json = JsonSerializer.Serialize(problem, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
