@@ -1,10 +1,18 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/SocialLogin.Application/SocialLogin.Application.csproj" />
-    <Project Path="src/SocialLogin.Domain/SocialLogin.Domain.csproj" />
-    <Project Path="src/SocialLogin.Infrastructure/SocialLogin.Infrastructure.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/Application/">
+    <File Path="src/Application/SocialLogin.Application.csproj" />
   </Folder>
-  <Folder Name="/src/SocialLogin.Api/">
-    <Project Path="src/SocialLogin.Api/ApiPresentation.csproj" />
+  <Folder Name="/src/Common/">
+    <Project Path="src/Common/Common.csproj" />
+  </Folder>
+  <Folder Name="/src/Domain/">
+    <Project Path="src/Domain/SocialLogin.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/Infrastructure/SocialLogin.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="src/Presentation/ApiPresentation.csproj" />
   </Folder>
 </Solution>
